@@ -5,8 +5,19 @@ from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_core.messages import HumanMessage
 from langchain_tavily import TavilySearch
+from typing import List
+from pydantic import BaseModel, Field
 # from tavily import TavilyClient
 load_dotenv()
+
+class Source(BaseModel):
+    """A source for the information retrieved by the agent."""
+    url: str = Field(description="The URL of the source")
+
+class AgentResponse(BaseModel):
+    """The response from the agent."""
+    answer: str = Field(description="The answer to the user's question")
+    sources: List[Source] = Field(default_factory=list, description="The sources for the information")    
 
 # tavily = TavilyClient()
 
@@ -25,7 +36,7 @@ load_dotenv()
 
 llm = ChatOpenAI()
 tools = [TavilySearch()]
-agent = create_agent(model=llm, tools=tools)
+agent = create_agent(model=llm, tools=tools, response_format=AgentResponse)
 
 def main():
     print("Hello from langchain-course!")
